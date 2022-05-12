@@ -6,7 +6,7 @@ from pygame.math import Vector2
 
 class DRAGON:
     def __init__(self):
-        self.body = [Vector2(5, 10), Vector2(6, 10), Vector2(7, 10)]
+        self.body = [Vector2(5, 10), Vector2(4, 10), Vector2(3, 10)]
         self.direction = Vector2(1, 0)
         self.new_block = False
 
@@ -33,7 +33,6 @@ class DRAGON:
         self.new_block = True
 
 
-
 class MEAT:
     def __init__(self):
         self.randomize()
@@ -49,23 +48,40 @@ class MEAT:
 
 
 class MAIN:
+    # References for the dragon and the meat to make it easier to implement other stuff in the code
     def __init__(self):
         self.dragon = DRAGON()
         self.meat = MEAT()
 
+    # Every 0.1 second check for collision and player input
     def update(self):
         self.dragon.move_dragon()
         self.check_collision()
-
+        self.check_fail()
+    # At the start of frame draw the dragon and the meat on the main screen
     def draw_elements(self):
         self.meat.draw_meat()
         self.dragon.draw_dragon()
 
+    # This check the collision with the dragon and the meat
     def check_collision(self):
         if self.meat.pos == self.dragon.body[0]:
             self.meat.randomize()
             self.dragon.add_block()
             print("MUNCH")
+
+    # This will check if the dragon is outside of the screen or has hit itself
+    def check_fail(self):
+        if not 0 <= self.dragon.body[0].x < cell_number or not 0 <= self.dragon.body[0].y < cell_number:
+            self.game_over()
+        # Cycle all the dragon body blocks except for the head
+        for block in self.dragon.body[1:]:
+            if block == self.dragon.body[0]:
+                self.game_over()
+
+    def game_over(self):
+        pygame.quit()
+        sys.exit()
 
 
 pygame.init()
@@ -79,7 +95,6 @@ main_game = MAIN()
 SCREEN_UPDATE = pygame.USEREVENT
 pygame.time.set_timer(SCREEN_UPDATE, 150)
 
-
 while True:
     # Draw all of the elements on the main display source
     for event in pygame.event.get():
@@ -90,13 +105,17 @@ while True:
             main_game.update()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                main_game.dragon.direction = Vector2(0, -1)
+                if main_game.dragon.direction.y != 1:
+                    main_game.dragon.direction = Vector2(0, -1)
             if event.key == pygame.K_RIGHT:
-                main_game.dragon.direction = Vector2(1, -0)
+                if main_game.dragon.direction.x != -1:
+                    main_game.dragon.direction = Vector2(1, -0)
             if event.key == pygame.K_LEFT:
-                main_game.dragon.direction = Vector2(-1, 0)
+                if main_game.dragon.direction.x != 1:
+                    main_game.dragon.direction = Vector2(-1, 0)
             if event.key == pygame.K_DOWN:
-                main_game.dragon.direction = Vector2(0, 1)
+                if main_game.dragon.direction.y != -1:
+                    main_game.dragon.direction = Vector2(0, 1)
 
     screen.fill((175, 215, 70))
     main_game.draw_elements()
