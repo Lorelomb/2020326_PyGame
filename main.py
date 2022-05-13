@@ -1,6 +1,8 @@
 import pygame
 import sys
 import random
+
+from pygame import VIDEORESIZE
 from pygame.math import Vector2
 
 
@@ -39,6 +41,7 @@ class MEAT:
 
     def draw_meat(self):
         meat_rect = pygame.Rect(int(self.pos.x * cell_size), int(self.pos.y * cell_size), cell_size, cell_size)
+        screen.blit(turkey, meat_rect)
         pygame.draw.rect(screen, (126, 166, 114), meat_rect)
 
     def randomize(self):
@@ -58,6 +61,7 @@ class MAIN:
         self.dragon.move_dragon()
         self.check_collision()
         self.check_fail()
+
     # At the start of frame draw the dragon and the meat on the main screen
     def draw_elements(self):
         self.meat.draw_meat()
@@ -86,14 +90,17 @@ class MAIN:
 
 pygame.init()
 cell_size = 40
-cell_number = 20
-screen = pygame.display.set_mode((cell_number * cell_size, cell_number * cell_size))
+cell_number = 30
+screen = pygame.display.set_mode((cell_number * cell_size, cell_number * cell_size), pygame.RESIZABLE)
 clock = pygame.time.Clock()
+turkey = pygame.image.load('Assets/turkey.png').convert_alpha()
+monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
 
+fullscreen = False
 main_game = MAIN()
 
 SCREEN_UPDATE = pygame.USEREVENT
-pygame.time.set_timer(SCREEN_UPDATE, 150)
+pygame.time.set_timer(SCREEN_UPDATE, 60)
 
 while True:
     # Draw all of the elements on the main display source
@@ -103,7 +110,16 @@ while True:
             sys.exit()
         if event.type == SCREEN_UPDATE:
             main_game.update()
+        if event.type == VIDEORESIZE:
+            if not fullscreen:
+                screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_f:
+                fullscreen = not fullscreen
+                if fullscreen:
+                    screen = pygame.display.set_mode((screen.get_width(), screen.get_height()), pygame.FULLSCREEN)
+                else:
+                    screen = pygame.display.set_mode((screen.get_width(), screen.get_height()), pygame.RESIZABLE)
             if event.key == pygame.K_UP:
                 if main_game.dragon.direction.y != 1:
                     main_game.dragon.direction = Vector2(0, -1)
