@@ -90,6 +90,7 @@ class DRAGON:
         elif tail_relation == Vector2(0, 1): self.tail = self.tail_down
         elif tail_relation == Vector2(0, -1): self.tail = self.tail_up
 
+    # The head moves to a new block, the next bock then moves to the previous position of the head
     def move_dragon(self):
         if self.new_block == True:
             body_copy = self.body[:]
@@ -104,6 +105,7 @@ class DRAGON:
     def add_block(self):
         self.new_block = True
 
+    # On death reset dragon's body vector to initial location on load
     def reset(self):
         self.body = [Vector2(5, 10), Vector2(4, 10), Vector2(3, 10)]
         self.direction = Vector2(0, 0)
@@ -139,6 +141,7 @@ class MAIN:
 
     # At the start of frame draw the dragon and the meat on the main screen
     def draw_elements(self):
+        self.draw_grass()
         self.meat.draw_meat()
         self.dragon.draw_dragon()
         self.draw_score()
@@ -166,20 +169,39 @@ class MAIN:
     def game_over(self):
         self.dragon.reset()
 
+    # Draw the score using the block added to the main body
     def draw_score(self):
         score_text = str(len(self.dragon.body) - 3)
+        # Controls text
+        screen.blit(controls_text, (120, 5))
+        # Font used on the scoreboard
         score_surface = game_font.render(score_text, True, (56, 74, 12))
+        # Position of the scoreboard
         score_x = int(cell_size * cell_number - 60)
         score_y = int(cell_size * cell_number - 40)
         score_rect = score_surface.get_rect(center=(score_x, score_y))
         meat_rect = meat.get_rect(midright=(score_rect.left, score_rect.centery))
-        bg_rect = pygame.Rect(meat_rect.left, meat_rect.top, meat_rect.width + score_rect.width + 6, meat_rect.height)
+        bg_rect = pygame.Rect(meat_rect.left, meat_rect.top, meat_rect.width + score_rect.width + 10, meat_rect.height)
 
         pygame.draw.rect(screen, (167, 209, 61), bg_rect)
         screen.blit(score_surface, score_rect)
         screen.blit(meat, meat_rect)
         pygame.draw.rect(screen, (56, 74, 12), bg_rect, 2)
 
+    # Give the checkers look to the grass
+    def draw_grass(self):
+        grass_colour = (112, 162, 65)
+        for row in range(cell_number):
+            if row % 2 == 0:
+                for col in range(cell_number):
+                    if col % 2 == 0:
+                        grass_rect = pygame.Rect(col * cell_size,row * cell_size, cell_size,cell_size)
+                        pygame.draw.rect(screen, grass_colour, grass_rect)
+            else:
+                for col in range(cell_number):
+                    if col % 2 != 0:
+                        grass_rect = pygame.Rect(col * cell_size,row * cell_size, cell_size,cell_size)
+                        pygame.draw.rect(screen, grass_colour, grass_rect)
 
 pygame.init()
 # Grid size
@@ -192,7 +214,9 @@ clock = pygame.time.Clock()
 meat = pygame.image.load('Assets/turkey.png').convert_alpha()
 monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
 # Load font for the scoreboard
-game_font = pygame.font.Font('Font/Retro_Future_Curly_E_Spaced.ttf', 25)
+game_font = pygame.font.Font('Font/Retro_Future_Curly_E_Spaced.ttf', 20)
+# Load text using the font added with the set colour values
+controls_text = game_font.render("Use the arrow keys to control the dragon", True, (0, 0, 0))
 
 fullscreen = False
 main_game = MAIN()
